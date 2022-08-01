@@ -136,6 +136,7 @@ def parseargs(argv):
          cfgpaths.insert(0, arg);
 
 def loadconfig(cfgpaths):
+   config = {}
    for cfg in cfgpaths:
       if not quiet:
          print("Looking for config in %s" % cfg)
@@ -375,6 +376,9 @@ try:
       quiet = False
 
    config = loadconfig(cfgpaths)
+   if not config:
+      print("No config files found")
+      sys.exit(1)
 
    if not quiet_override:
       try:
