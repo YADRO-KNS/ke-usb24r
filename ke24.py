@@ -396,18 +396,6 @@ try:
       pp.pprint(relays)
       pp.pprint(gpios)
 
-#         try:
-#            for device in config['Devices']:
-#               print('Found device %s' % device)
-#               port = device['port']
-##            port = config['Device']['Port']
-#         except Exception:
-#            raise RuntimeError("No port defined in configuration")
-#
-#         if not Path.is_char_device(Path(port)):
-#            raise RuntimeError("The port %s is not a character device"
-#                               % port)
-
 except Exception as e:
 #  raise SystemExit(e)
    print(f"FAIL: {e}")
