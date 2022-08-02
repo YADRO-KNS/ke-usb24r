@@ -13,6 +13,7 @@ This is a Python program to control the [KernelChip KE-USB24R][1] relay module.
 
 Currently, the program supports the following operations:
 
+  - Identify a Ke-USB24R device on a serial port
   - Reading a relay state
   - Reading a GPIO line state
   - Setting a GPIO line output value
@@ -65,6 +66,25 @@ for example, `/usr/local/bin`, and make it executable:
 ```
 $ cp ke24.py /usr/local/bin
 $ chmod 755 /user/local/bin/ke24.py
+```
+
+After that, create a configuration file from the ke23.conf template
+and put it into either `/etc/ke24.conf` or into `~/.config/ke24.conf`.
+You may also use any other name, but then you'll need to specify it
+at each run, so that is not advised.
+
+Optionally, you may configure udev to create special device node
+aliases for Ke-USB24R that will look like this:
+
+```
+/dev/ttyACM.Ke-USB24R.67LR-IT5B-94M7-PIZ6
+```
+where the last part is your module's serial number. In order to achieve
+that, create a udev rule file `/etc/udev/rules.d/99-Ke-USB24R.rules`
+with the following content:
+
+```
+SUBSYSTEM=="tty", ATTRS{product}=="Ke-USB24R", PROGRAM="/usr/local/bin/ke24 -I $tempnode", SYMLINK+="ttyACM.Ke-USB24R.%c"
 ```
 
 ***Usage***

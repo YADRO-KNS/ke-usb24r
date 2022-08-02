@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # vim: set ts=3 sw=3 et :
 
-version = '2.0'
+version = '2.1'
 #debug = True
 debug = False
 
@@ -43,6 +43,10 @@ def printHelp(rc = 0, argv = ['ke24.py']):
         +'\t                        set the device selected with -r or -o to new\n'
         +'\t                        numeric <value> or to the named value with\n'
         +'\t                        the given <name>')
+   print('\t-I|--identify <port>  - Identify the device in <port>\n'
+         '\t                        Will return 0 and print the serial number\n'
+         '\t                        if the device is a Ke-USB24R, will return 1\n'
+         '\t                        otherwise')
    sys.exit(rc)
 
 def parseargs(argv):
@@ -52,13 +56,21 @@ def parseargs(argv):
 
    try:
       opts, args = getopt.getopt(argv[1:],
-                                 "hqvc:r:o:s:d:",
-                                 ["help", "quiet", "verbose",
+                                 "hqvc:r:o:s:d:I:",
+                                 ["help", "quiet", "verbose","identify=",
                                   "config=","device=","relay=","gpio=","set="])
    except getopt.GetoptError:
       printHelp(2, argv)
 
    for opt, arg in opts:
+      # The 'identify' and 'help' options abort processing of the others
+      if opt in ['-h', "--help"]:
+         break
+      elif opt in ['-I', "--identify"]:
+         actions.append({'operation': 'Identify', 'port': arg})
+         break
+
+
       # These options define actions and their targets
       if opt in ['-s', '--set',
                  '-r', '--relay',
@@ -91,9 +103,7 @@ def parseargs(argv):
          except Exception:
             pass
 
-      if opt in ['-h', "--help"]:
-         printHelp(0, argv)
-      elif opt in ["-q", "--quiet"]:
+      if opt in ["-q", "--quiet"]:
          if quiet_override:
             raise RuntimeError("Don't specify both -q and -v")
          quiet = True
@@ -288,7 +298,7 @@ class Ke24:
       'GPIO'  : 18
    }
 
-   def __init__(self, port, baud):
+   def __init__(self, port, baud = 115200):
       self.port = serial.Serial(port, baudrate = baud, timeout = 0.100)
 
    def cmd(self, command):
@@ -366,6 +376,19 @@ parseargs(sys.argv)
 
 if len(actions) == 0:
    printHelp(0, sys.argv)
+else:
+   try:
+      action = actions[0]
+      if action['operation'] == 'Identify':
+         port = action['port']
+         try:
+            ke = Ke24(port)
+            print(ke.serial())
+            sys.exit(0)
+         except Exception as e:
+            sys.exit(1)
+   except Exception:
+      pass
 
 try:
    # If the mode wasn't set by command line options,
